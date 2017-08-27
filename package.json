@@ -7,16 +7,31 @@
   },
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "node test.js"
+    "start": "tsc -p ./src && concurrently \"tsc -w -p ./src\" \"nodemon ./index.js\""
   },
   "dependencies": {
-    "ejs": "2.5.6",
-    "express": "4.15.2"
+    "@types/body-parser": "^0.0.32",
+    "@types/express": "^4.0.32",
+    "@types/mongodb": "^2.2.9",
+    "@types/node": "^6.0.48",
+    "agentkeepalive": "3.1.0",
+    "async": "2.1.5",
+    "body-parser": "^1.17.2",
+    "cors": "^2.8.4",
+    "express": "^4.15.2",
+    "express-ntlm": "2.1.5",
+    "httpntlm": "1.7.5",
+    "mongodb": "^2.2.30",
+    "node-fs": "^0.1.7",
+    "ts-loader": "2.0.1",
+    "ts-node": "1.2.1",
+    "tslint": "^4.0.0",
+    "typescript": "^2.1.6"
   },
   "devDependencies": {
-    "request": "^2.81.0",
-    "tape": "^4.7.0"
+    "@types/cors": "^2.8.1",
+    "concurrently": "^3.1.0",
+    "nodemon": "^1.11.0"
   },
   "repository": {
     "type": "git",
@@ -25,7 +40,8 @@
   "keywords": [
     "node",
     "heroku",
-    "express"
+    "express",
+    "mongodb"
   ],
   "license": "MIT"
 }
