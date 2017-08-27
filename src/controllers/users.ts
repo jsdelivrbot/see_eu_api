@@ -3,13 +3,13 @@ import { Db, ObjectID, InsertOneWriteOpResult } from 'mongodb';
 import { User } from '../models/user';
 
 const USERS = "users";
+
 export class UsersController {
     public static route: string = `/${USERS}`;
     public router: Router = Router();
     private db: Db;
     constructor(db: Db) {
         this.db = db;
-
 
         this.router.post('/login', this.login.bind(this));
         // this.router.get('/:id', this.findUser.bind(this));
@@ -24,36 +24,11 @@ export class UsersController {
             email: new RegExp(user.email, "i"),
             password: user.password
         })
-            .then((usr: User) => { res.status(200).send(usr) })
+            .then((usr: User) => { 
+                res.status(200).send(usr) })
             .catch(err => res.status(403).send(err))
     }
 
-    // private findUsers(req: Request, res: Response) {
-
-    //     this.db
-    //         .collection(USERS)
-    //         .find().toArray()
-    //         .then((users: User[]) => {
-    //             res.status(200).send(users);
-    //         }).catch(err => {
-    //             res.status(400).send(err);
-    //         })
-    // }
-
-    // private findUser(req: Request, res: Response) {
-    //     this.fetchUser(req.params.id)
-    //         .then((user: User) => {
-    //             res.status(200).send(user);
-    //         }).catch(err => {
-    //             res.status(400).send(err);
-    //         })
-    // }
-
-    // private fetchUser(userId: number): Promise<User> {
-    //     return this.db
-    //         .collection(USERS)
-    //         .findOne({ id: userId });
-    // }
 
     private createUser(req: Request, res: Response) {
         let user: User = req.body;
@@ -63,7 +38,7 @@ export class UsersController {
         this.db.collection(USERS).findOne({
             email: new RegExp(user.email, "i")
         })
-            .then((existingUsr: User) => {
+            .then(() => {
                 res.status(409).send({message:"User already exists with this email"});
             })
             .catch(() => {
@@ -96,4 +71,32 @@ export class UsersController {
             .then(deleteResult => res.send())
             .catch(error => res.status(400).send(error));
     }
+
+    
+    // private findUsers(req: Request, res: Response) {
+
+    //     this.db
+    //         .collection(USERS)
+    //         .find().toArray()
+    //         .then((users: User[]) => {
+    //             res.status(200).send(users);
+    //         }).catch(err => {
+    //             res.status(400).send(err);
+    //         })
+    // }
+
+    // private findUser(req: Request, res: Response) {
+    //     this.fetchUser(req.params.id)
+    //         .then((user: User) => {
+    //             res.status(200).send(user);
+    //         }).catch(err => {
+    //             res.status(400).send(err);
+    //         })
+    // }
+
+    // private fetchUser(userId: number): Promise<User> {
+    //     return this.db
+    //         .collection(USERS)
+    //         .findOne({ id: userId });
+    // }
 }
