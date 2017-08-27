@@ -6,44 +6,63 @@ class UsersController {
     constructor(db) {
         this.router = express_1.Router();
         this.db = db;
-        this.router.get('/', this.findUsers.bind(this));
-        this.router.get('/:id', this.findUser.bind(this));
+        this.router.post('/login', this.login.bind(this));
+        // this.router.get('/:id', this.findUser.bind(this));
         this.router.post('/', this.createUser.bind(this));
         this.router.put('/:id', this.updateUser.bind(this));
         this.router.delete('/:id', this.deleteUser.bind(this));
     }
-    findUsers(req, res) {
-        this.db
-            .collection(USERS)
-            .find().toArray()
-            .then((users) => {
-            res.status(200).send(users);
-        }).catch(err => {
-            res.status(400).send(err);
-        });
+    login(req, res) {
+        let user = req.body;
+        this.db.collection(USERS).findOne({
+            email: new RegExp(user.email, "i"),
+            password: user.password
+        })
+            .then((usr) => { res.status(200).send(usr); })
+            .catch(err => res.status(403).send(err));
     }
-    findUser(req, res) {
-        this.fetchUser(req.params.id)
-            .then((user) => {
-            res.status(200).send(user);
-        }).catch(err => {
-            res.status(400).send(err);
-        });
-    }
-    fetchUser(userId) {
-        return this.db
-            .collection(USERS)
-            .findOne({ id: userId });
-    }
+    // private findUsers(req: Request, res: Response) {
+    //     this.db
+    //         .collection(USERS)
+    //         .find().toArray()
+    //         .then((users: User[]) => {
+    //             res.status(200).send(users);
+    //         }).catch(err => {
+    //             res.status(400).send(err);
+    //         })
+    // }
+    // private findUser(req: Request, res: Response) {
+    //     this.fetchUser(req.params.id)
+    //         .then((user: User) => {
+    //             res.status(200).send(user);
+    //         }).catch(err => {
+    //             res.status(400).send(err);
+    //         })
+    // }
+    // private fetchUser(userId: number): Promise<User> {
+    //     return this.db
+    //         .collection(USERS)
+    //         .findOne({ id: userId });
+    // }
     createUser(req, res) {
-        req.body.id = (new Date()).valueOf().toString();
-        this.db
-            .collection(USERS)
-            .insertOne(req.body)
-            .then((response) => {
-            res.send(req.body.id);
-        }).catch(err => {
-            res.status(400).send(err);
+        let user = req.body;
+        let $this = this;
+        user.id = (new Date()).valueOf().toString();
+        this.db.collection(USERS).findOne({
+            email: new RegExp(user.email, "i")
+        })
+            .then((existingUsr) => {
+            res.status(409).send({ message: "User already exists with this email" });
+        })
+            .catch(() => {
+            $this.db
+                .collection(USERS)
+                .insertOne(user)
+                .then((response) => {
+                res.send(req.body.id);
+            }).catch(err => {
+                res.status(400).send(err);
+            });
         });
     }
     updateUser(req, res) {

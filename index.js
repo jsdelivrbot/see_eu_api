@@ -5,8 +5,7 @@ const body_parser_1 = require("body-parser");
 const mongodb_1 = require("mongodb");
 const cors = require("cors");
 const users_1 = require("./controllers/users");
-const customers_1 = require("./controllers/customers");
-const tasks_1 = require("./controllers/tasks");
+const images_1 = require("./controllers/images");
 class Index {
     constructor() {
         this.app = express();
@@ -33,9 +32,8 @@ class Index {
         app.options("*", cors(options));
     }
     configureRoutes(app, db) {
-        app.use(customers_1.CustomerController.route, new customers_1.CustomerController(db).router);
         app.use(users_1.UsersController.route, new users_1.UsersController(db).router);
-        app.use(tasks_1.TasksController.route, new tasks_1.TasksController(db).router);
+        app.use(images_1.ImagesController.route, new images_1.ImagesController(db).router);
     }
 }
 exports.Index = Index;
