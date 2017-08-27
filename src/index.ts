@@ -8,7 +8,9 @@ import * as cors from "cors";
 
 import { UsersController } from './controllers/users';
 import { ImagesController } from './controllers/images'
-import { LanguagesController } from './controllers/languages'
+import { LanguagesController } from './controllers/languages';
+import { LocalitiesController } from './controllers/localities';
+
 export class Index {
     public app: Express;
     constructor() {
@@ -44,6 +46,7 @@ export class Index {
         app.use(UsersController.route, new UsersController(db).router);
         app.use(ImagesController.route, new ImagesController(db).router);
         app.use(LanguagesController.route, new LanguagesController(db).router);
+        app.use(LocalitiesController.route, new LocalitiesController(db).router);
     }
 
 }

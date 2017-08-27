@@ -18,32 +18,11 @@ class UsersController {
             email: new RegExp(user.email, "i"),
             password: user.password
         })
-            .then((usr) => { res.status(200).send(usr); })
+            .then((usr) => {
+            res.status(200).send(usr);
+        })
             .catch(err => res.status(403).send(err));
     }
-    // private findUsers(req: Request, res: Response) {
-    //     this.db
-    //         .collection(USERS)
-    //         .find().toArray()
-    //         .then((users: User[]) => {
-    //             res.status(200).send(users);
-    //         }).catch(err => {
-    //             res.status(400).send(err);
-    //         })
-    // }
-    // private findUser(req: Request, res: Response) {
-    //     this.fetchUser(req.params.id)
-    //         .then((user: User) => {
-    //             res.status(200).send(user);
-    //         }).catch(err => {
-    //             res.status(400).send(err);
-    //         })
-    // }
-    // private fetchUser(userId: number): Promise<User> {
-    //     return this.db
-    //         .collection(USERS)
-    //         .findOne({ id: userId });
-    // }
     createUser(req, res) {
         let user = req.body;
         let $this = this;
@@ -51,7 +30,7 @@ class UsersController {
         this.db.collection(USERS).findOne({
             email: new RegExp(user.email, "i")
         })
-            .then((existingUsr) => {
+            .then(() => {
             res.status(409).send({ message: "User already exists with this email" });
         })
             .catch(() => {

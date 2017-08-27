@@ -36,7 +36,8 @@ export class LanguagesController {
         this.db.collection(LANGUAGES).updateOne(
             {
                 id: language.id
-            }, {
+            }, 
+            {
                 $set: language
             })
             .then(() => res.send(language))

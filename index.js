@@ -6,6 +6,8 @@ const mongodb_1 = require("mongodb");
 const cors = require("cors");
 const users_1 = require("./controllers/users");
 const images_1 = require("./controllers/images");
+const languages_1 = require("./controllers/languages");
+const localities_1 = require("./controllers/localities");
 class Index {
     constructor() {
         this.app = express();
@@ -34,6 +36,8 @@ class Index {
     configureRoutes(app, db) {
         app.use(users_1.UsersController.route, new users_1.UsersController(db).router);
         app.use(images_1.ImagesController.route, new images_1.ImagesController(db).router);
+        app.use(languages_1.LanguagesController.route, new languages_1.LanguagesController(db).router);
+        app.use(localities_1.LocalitiesController.route, new localities_1.LocalitiesController(db).router);
     }
 }
 exports.Index = Index;
