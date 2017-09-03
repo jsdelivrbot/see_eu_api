@@ -10,6 +10,7 @@ import { UsersController } from './controllers/users';
 import { ImagesController } from './controllers/images'
 import { LanguagesController } from './controllers/languages';
 import { LocalitiesController } from './controllers/localities';
+import { TripsController } from './controllers/trips';
 
 export class Index {
     public app: Express;
@@ -47,6 +48,7 @@ export class Index {
         app.use(ImagesController.route, new ImagesController(db).router);
         app.use(LanguagesController.route, new LanguagesController(db).router);
         app.use(LocalitiesController.route, new LocalitiesController(db).router);
+        app.use(TripsController.route, new TripsController(db).router);
     }
 
 }
