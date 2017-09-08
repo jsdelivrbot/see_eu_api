@@ -6,6 +6,7 @@ import { VariationType, Variation } from "./variation";
 export class Trip {
     id: string;
     discountEndDate: Date;
+    discountPercentage: number;
     startDate: Date;
     endDate: Date;
     images: Image[];
