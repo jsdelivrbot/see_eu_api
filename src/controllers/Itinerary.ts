@@ -62,7 +62,7 @@ export class ItineraryController {
                     foreignField: "id",
                     as: "variations"
                 }
-            }
+            },
             {
                 $group: {
                     _id: "$id",
