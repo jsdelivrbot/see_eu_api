@@ -10,6 +10,7 @@ export class RangeBasedParam{
 
 export class ValueBasedParam{
     languageId:string;
+    label:string;
     increaseBy?:number;
 }
 
