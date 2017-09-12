@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { Db, ObjectID, InsertOneWriteOpResult } from 'mongodb';
+import { Trip } from "../models/trip";
 //import { User } from '../models/user';
 
 const TRIPS = "trips";
@@ -15,7 +16,7 @@ export class TripsController {
         this.router.post('/', this.post.bind(this));
         this.router.get('/:id', this.getById.bind(this));
         // this.router.post('/', this.createUser.bind(this));
-        // this.router.put('/:id', this.updateUser.bind(this));
+        this.router.put('/:id', this.put.bind(this));
         // this.router.delete('/:id', this.deleteUser.bind(this))
     }
 
@@ -29,19 +30,15 @@ export class TripsController {
             .catch(err => res.status(403).send(err))
     }
 
+    private put(req: Request, res: Response) {
+
+    }
+
     private getById(req: Request, res: Response) {
         this.db.collection(TRIPS).aggregate([
             {
                 $match: {
                     id: req.params.id
-                }
-            },
-            {
-                $lookup: {
-                    from: TRIP_DETAILS,
-                    localField: "id",
-                    foreignField: "tripId",
-                    as: TRIP_DETAILS
                 }
             },
             {
@@ -58,15 +55,18 @@ export class TripsController {
             {
                 $group: {
                     _id: "$id",
+                    discountPercentage: { $first: '$discountPercentage' },
+                    images: { $first: '$images' },
                     discountEndDate: { $first: "$discountEndDate" },
                     startDate: { $first: "$startDate" },
                     endDate: { $first: "$endDate" },
                     tripDetails: { $first: "$tripDetails" },
-                    pickupPoints: { $addToSet: "$pickupPoints" }
+                    pickupPoints: { $addToSet: "$pickupPoints" },
+                    variation: {$first:'$variations'}
                 }
             }
         ]).next()
-            .then(trip => {
+            .then((trip: Trip) => {
                 res.send(trip);
             }).catch(err => res.status(500).send(err));
     }
