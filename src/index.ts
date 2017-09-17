@@ -12,6 +12,7 @@ import { LanguagesController } from './controllers/languages';
 import { LocalitiesController } from './controllers/localities';
 import { TripsController } from './controllers/trips';
 import { VariationsController } from "./controllers/variations";
+import { PaymentController } from "./controllers/PaymentController";
 
 export class Index {
     public app: Express;
@@ -51,6 +52,7 @@ export class Index {
         app.use(LocalitiesController.route, new LocalitiesController(db).router);
         app.use(TripsController.route, new TripsController(db).router);
         app.use(VariationsController.route, new VariationsController(db).router);
+        app.use(PaymentController.route, new PaymentController().router);        
     }
 
 }

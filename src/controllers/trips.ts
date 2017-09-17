@@ -12,12 +12,13 @@ export class TripsController {
     private db: Db;
     constructor(db: Db) {
         this.db = db;
-
+        this.router.get('/', this.get.bind(this));        
         this.router.post('/', this.post.bind(this));
         this.router.get('/:id', this.getById.bind(this));
         // this.router.post('/', this.createUser.bind(this));
         this.router.put('/:id', this.put.bind(this));
         // this.router.delete('/:id', this.deleteUser.bind(this))
+
     }
 
     private post(req: Request, res: Response) {
@@ -32,6 +33,12 @@ export class TripsController {
 
     private put(req: Request, res: Response) {
 
+    }
+    private get(req: Request, res: Response) {
+        this.db.collection(TRIPS).find().toArray()
+            .then(trips => {
+                res.send(trips);
+            }).catch(err => res.status(500).send(err));
     }
 
     private getById(req: Request, res: Response) {

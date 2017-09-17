@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { Db, ObjectID, InsertOneWriteOpResult } from 'mongodb';
+import { Itinerary } from "../models/itinerary";
 //import { User } from '../models/user';
 
 const ITINERARY = "itinerary";
@@ -11,8 +12,7 @@ export class ItineraryController {
     private db: Db;
     constructor(db: Db) {
         this.db = db;
-
-        this.router.post('/', this.post.bind(this));
+        this.router.post('/', this.post.bind(this));        
         this.router.get('/:id', this.getById.bind(this));
     }
 
@@ -25,52 +25,11 @@ export class ItineraryController {
             })
             .catch(err => res.status(403).send(err))
     }
-
     private getById(req: Request, res: Response) {
         this.db.collection(ITINERARY).aggregate([
             {
                 $match: {
                     id: req.params.id
-                }
-            },
-            {
-                $lookup: {
-                    from: ITINERARY_DETAILS,
-                    localField: "id",
-                    foreignField: "itineraryId",
-                    as: ITINERARY_DETAILS
-                }
-            },
-            {
-                $unwind: "$pickupPoints"
-            },
-            {
-                $lookup: {
-                    from: "localities",
-                    localField: "pickupPoints.localityId",
-                    foreignField: "id",
-                    as: "pickupPoints.locality"
-                }
-            },
-            {
-                $unwind: "$variationDetails"
-            },
-            {
-                $lookup: {
-                    from: "variationDetails",
-                    localField: "variations.variationDetailId",
-                    foreignField: "id",
-                    as: "variations"
-                }
-            },
-            {
-                $group: {
-                    _id: "$id",
-                    tripId: { $first: "$tripId" },
-                    userId: { $first: "$userId" },                    
-                    itineraryDetails: { $first: "$itineraryDetails" },
-                    pickupPoints: { $addToSet: "$pickupPoints" },
-                    variationDetails: {$addToSet: "$variationDetails"}
                 }
             }
         ]).next()
