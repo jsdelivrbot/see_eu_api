@@ -62,7 +62,9 @@ export class TripsController {
 
     }
     private get(req: Request, res: Response) {
-        this.db.collection(TRIPS).find().toArray()
+        this.db.collection(TRIPS).aggregate([
+            ...aggrigate
+        ]).toArray()
             .then(trips => {
                 res.send(trips);
             }).catch(err => res.status(500).send(err));
