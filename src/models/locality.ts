@@ -1,5 +1,4 @@
 export class Locality {
     id: string;
-    languageId: string;
-    name: string;
+    details:{languageId:string,name:string}[]
 }

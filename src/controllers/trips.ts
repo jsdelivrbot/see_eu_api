@@ -5,6 +5,33 @@ import { Trip } from "../models/trip";
 
 const TRIPS = "trips";
 const TRIP_DETAILS = "tripDetails";
+const aggrigate = [
+    {
+        $unwind: "$pickupPoints"
+    },
+    {
+        $lookup: {
+            from: "localities",
+            localField: "pickupPoints.localityId",
+            foreignField: "id",
+            as: "pickupPoints.locality"
+        }
+    },
+    {
+        $group: {
+            _id: "$id",
+            id: { $first: "$id" },
+            discountPercentage: { $first: '$discountPercentage' },
+            images: { $first: '$images' },
+            discountEndDate: { $first: "$discountEndDate" },
+            startDate: { $first: "$startDate" },
+            endDate: { $first: "$endDate" },
+            tripDetails: { $first: "$tripDetails" },
+            pickupPoints: { $addToSet: "$pickupPoints" },
+            variation: { $first: '$variations' }
+        }
+    }
+]
 
 export class TripsController {
     public static route: string = `/${TRIPS}`;
@@ -12,7 +39,7 @@ export class TripsController {
     private db: Db;
     constructor(db: Db) {
         this.db = db;
-        this.router.get('/', this.get.bind(this));        
+        this.router.get('/', this.get.bind(this));
         this.router.post('/', this.post.bind(this));
         this.router.get('/:id', this.getById.bind(this));
         // this.router.post('/', this.createUser.bind(this));
@@ -42,40 +69,19 @@ export class TripsController {
     }
 
     private getById(req: Request, res: Response) {
+       
         this.db.collection(TRIPS).aggregate([
             {
                 $match: {
                     id: req.params.id
                 }
             },
-            {
-                $unwind: "$pickupPoints"
-            },
-            {
-                $lookup: {
-                    from: "localities",
-                    localField: "pickupPoints.localityId",
-                    foreignField: "id",
-                    as: "pickupPoints.locality"
-                }
-            },
-            {
-                $group: {
-                    _id: "$id",
-                    discountPercentage: { $first: '$discountPercentage' },
-                    images: { $first: '$images' },
-                    discountEndDate: { $first: "$discountEndDate" },
-                    startDate: { $first: "$startDate" },
-                    endDate: { $first: "$endDate" },
-                    tripDetails: { $first: "$tripDetails" },
-                    pickupPoints: { $addToSet: "$pickupPoints" },
-                    variation: {$first:'$variations'}
-                }
-            }
+            ...aggrigate
         ]).next()
             .then((trip: Trip) => {
                 res.send(trip);
             }).catch(err => res.status(500).send(err));
     }
+
 
 }
