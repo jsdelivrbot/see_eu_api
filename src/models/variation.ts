@@ -2,13 +2,16 @@ export enum VariationType {
     VALUE_BASED,
     RANGE_BASED
 }
-export class RangeBasedParam {
+export class RangeBasedParams {
+
     from: number;
     to: number;
     increaseBy?: number;
+
 }
 
-export class ValueBasedParam {
+export class ValueBasedParams {
+
     labelInfo: {
         languageId: string;
         label: string;
@@ -24,5 +27,5 @@ export class Variation {
         name: string;
         unit?: string;
     }[];
-    params: RangeBasedParam[] | ValueBasedParam[]
+    params: RangeBasedParams[] | ValueBasedParams[]
 }

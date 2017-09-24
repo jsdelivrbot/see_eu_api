@@ -41,6 +41,7 @@ export class Index {
             origin: '*'
         }
         app.use(cors())
+        app.use('/uploads', express.static('uploads'))
         //enable pre-flight
         app.options("*", cors(options));
     }

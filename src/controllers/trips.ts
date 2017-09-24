@@ -42,7 +42,6 @@ export class TripsController {
         this.router.get('/', this.get.bind(this));
         this.router.post('/', this.post.bind(this));
         this.router.get('/:id', this.getById.bind(this));
-        // this.router.post('/', this.createUser.bind(this));
         this.router.put('/:id', this.put.bind(this));
         // this.router.delete('/:id', this.deleteUser.bind(this))
 
@@ -53,13 +52,21 @@ export class TripsController {
         trip.id = (new Date()).valueOf().toString();
         this.db.collection(TRIPS).insertOne(trip)
             .then((trp) => {
-                res.status(200).send(trp)
+                res.status(200).send(trip)
             })
             .catch(err => res.status(403).send(err))
     }
 
     private put(req: Request, res: Response) {
-
+        delete req.body._id;
+        let trip = req.body;
+        this.db.collection(TRIPS).updateOne({
+            id: trip.id
+        }, { $set: trip })
+            .then((trp) => {
+                res.status(200).send(trip)
+            })
+            .catch(err => res.status(403).send(err))
     }
     private get(req: Request, res: Response) {
         this.db.collection(TRIPS).aggregate([
@@ -71,14 +78,14 @@ export class TripsController {
     }
 
     private getById(req: Request, res: Response) {
-       
+
         this.db.collection(TRIPS).aggregate([
             {
                 $match: {
                     id: req.params.id
                 }
             },
-            ...aggrigate
+            //...aggrigate
         ]).next()
             .then((trip: Trip) => {
                 res.send(trip);

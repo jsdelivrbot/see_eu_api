@@ -8,22 +8,55 @@ class LocalitiesController {
         this.router = express_1.Router();
         this.router.post('/', this.create.bind(this));
         this.router.put('/:id', this.update.bind(this));
+        this.router.get("/", this.get.bind(this));
     }
     get(req, res) {
+        let filterDetailsByLang = [];
+        let projectDetailsAsObject = [];
+        if (req.query.lang) {
+            filterDetailsByLang = [
+                {
+                    $match: {
+                        "details.languageId": req.query.lang
+                    }
+                }
+            ];
+            projectDetailsAsObject = [
+                {
+                    $project: {
+                        id: "$_id",
+                        details: { $arrayElemAt: ["$details", 0] }
+                    }
+                }
+            ];
+        }
         this.db.collection(LOCALITIES).aggregate([
+            {
+                $unwind: "$details"
+            },
+            ...filterDetailsByLang,
             {
                 $lookup: {
                     from: 'languages',
-                    localField: 'languageId',
+                    localField: 'details.languageId',
                     foreignField: 'id',
-                    as: 'language'
+                    as: 'details.language'
                 }
-            }
+            },
+            {
+                $group: {
+                    _id: "$id",
+                    id: { $first: "$id" },
+                    details: {
+                        $addToSet: "$details"
+                    }
+                }
+            },
+            ...projectDetailsAsObject
         ]).toArray().then((localities) => {
             localities.forEach(l => l.language = l.language ? l.language[0] : null);
             res.send(localities);
-        })
-            .catch(err => res.status(500).send(err));
+        }).catch(err => res.status(500).send(err));
     }
     create(req, res) {
         let locality = req.body;
