@@ -44,8 +44,8 @@ export class PaymentController {
         };
 
         request(options, function (error, response, body) {
+            var body = JSON.parse(body);
             if (!error && response.statusCode == 201) {
-                var body = JSON.parse(body);
                 res.send({
                     code: 0,
                     data: {
@@ -57,7 +57,7 @@ export class PaymentController {
             else {
                 res.send({
                     code: response.statusCode,
-                    message: error.toString()
+                    message: body.error.message
                 });
             }
         });
