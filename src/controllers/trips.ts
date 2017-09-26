@@ -23,6 +23,7 @@ const aggrigate = [
             id: { $first: "$id" },
             discountPercentage: { $first: '$discountPercentage' },
             images: { $first: '$images' },
+            thumbnail: { $first: '$thumbnail'},
             discountEndDate: { $first: "$discountEndDate" },
             startDate: { $first: "$startDate" },
             endDate: { $first: "$endDate" },
