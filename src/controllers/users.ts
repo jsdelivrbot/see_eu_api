@@ -1,8 +1,16 @@
 import { Router, Request, Response } from 'express';
 import { Db, ObjectID, InsertOneWriteOpResult } from 'mongodb';
 import { User } from '../models/user';
+import { EmailController } from './EmailController';
+import { CryptoHelper } from '../Helper/CryptoHelper';
 
 const USERS = "users";
+
+/* TODO */
+// Create a user and mark it as inactive
+// Send activation url on email
+// Clicking activation link will extract the email from URL and check if the unactivated email exists in DB
+// If exists, account will be activated
 
 export class UsersController {
     public static route: string = `/${USERS}`;
@@ -16,6 +24,7 @@ export class UsersController {
         this.router.post('/', this.createUser.bind(this));
         this.router.put('/:id', this.updateUser.bind(this));
         this.router.delete('/:id', this.deleteUser.bind(this))
+        this.router.get('/activate/:uid', this.activate.bind(this));
     }
 
     private login(req: Request, res: Response) {
@@ -29,6 +38,22 @@ export class UsersController {
             .catch(err => res.status(403).send(err))
     }
 
+    private activate(req: Request, res: Response) {
+        // Clicking activation link will extract the email from URL and check if the unactivated email exists in DB
+        // If exists, account will be activated
+
+        var email = CryptoHelper.decrypt(req.params.uid);
+
+        var emailController = EmailController.instance();
+        emailController.send({
+            from: 'admin@see-globe.com',
+            to: email,
+            subject: 'Account Created',
+            html: '<html><body>Your account <strong>' + CryptoHelper.decrypt(req.params.uid) + '</strong> is verified<body></html>',
+            isPriority: true
+        });
+        res.send('Your account <strong>' + CryptoHelper.decrypt(req.params.uid) + '</strong> is verified');
+    }
 
     private createUser(req: Request, res: Response) {
         let user: User = req.body;
@@ -46,7 +71,19 @@ export class UsersController {
                     .collection(USERS)
                     .insertOne(user)
                     .then((response: InsertOneWriteOpResult) => {
-                        res.send(req.body.id);
+                        // Create a user and mark it as inactive
+                        // Send activation url on email
+                        var url = 'http://localhost:5000/users/activate/' + CryptoHelper.encrypt(user.email);
+                        var emailController = EmailController.instance();
+                        emailController.send({
+                            from: 'admin@see-globe.com',
+                            to: user.email,
+                            subject: 'Account Created',
+                            html: '<html><body>Thank you for registering with us. Please activate account by clicking on the below URL<br><br>' + url + '<body></html>',
+                            isPriority: true
+                        });
+
+                        res.send(req.body.id);                        
                     }).catch(err => {
                         res.status(400).send(err);
                     })
