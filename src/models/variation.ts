@@ -3,11 +3,9 @@ export enum VariationType {
     RANGE_BASED
 }
 export class RangeBasedParams {
-
     from: number;
     to: number;
     increaseBy?: number;
-
 }
 
 export class ValueBasedParams {
