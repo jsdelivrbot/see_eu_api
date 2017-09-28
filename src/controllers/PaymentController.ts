@@ -84,7 +84,7 @@ export class PaymentController {
             var emailController = EmailController.instance();
             emailController.send({
                 from: 'admin@see-globe.com',
-                to: 'email.sahilkhanna@gmail.com',
+                to: 'email.sahilkhanna@gmail.com, vivek.mehra1@gmail.com, crohit92@gmail.com',
                 subject: 'Payment Received',
                 html: '<html><body>We have received your payment of Euro <strong>' + body.amount + '</strong><body></html>',
                 isPriority: true
