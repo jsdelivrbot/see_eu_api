@@ -5,34 +5,99 @@ import { Trip } from "../models/trip";
 
 const TRIPS = "trips";
 const TRIP_DETAILS = "tripDetails";
-const aggrigate = [
-    {
-        $unwind: "$pickupPoints"
-    },
-    {
-        $lookup: {
-            from: "localities",
-            localField: "pickupPoints.localityId",
-            foreignField: "id",
-            as: "pickupPoints.locality"
+const getFilterForLang = (languageId: string): any[] => {
+    if (!languageId) { return []; }
+    return [
+        {
+            $unwind: "$tripDetails"
+        },
+        {
+            $match: {
+                "tripDetails.languageId": languageId
+            }
+        },
+        {
+            $unwind: "$pickupPoints"
+        },
+        {
+            $lookup: {
+                from: "localities",
+                localField: "pickupPoints.localityId",
+                foreignField: "id",
+                as: "pickupPoints.locality"
+            }
+        },
+        {
+            $project: {
+                id: "$id",
+                discountPercentage: "$discountPercentage",
+                images: "$images",
+                thumbnail: "$thumbnail",
+                discountEndDate: "$discountEndDate",
+                startDate: "$startDate",
+                endDate: "$endDate",
+                tripDetails: "$tripDetails",
+                pickupPoints: {
+                    "localityId": "$pickupPoints.localityId",
+                    "price": "$pickupPoints.price",
+                    "locality": {
+                        $arrayElemAt: ["$pickupPoints.locality", 0]
+
+                    }
+
+                },
+                variations: "$variations"
+            }
+        },
+        {//this project will filter pickuppoint details based on language
+            $project: {
+                id: "$id",
+                discountPercentage: "$discountPercentage",
+                images: "$images",
+                thumbnail: "$thumbnail",
+                discountEndDate: "$discountEndDate",
+                startDate: "$startDate",
+                endDate: "$endDate",
+                tripDetails: "$tripDetails",
+                pickupPoints: {
+                    "localityId": "$pickupPoints.localityId",
+                    "price": "$pickupPoints.price",
+                    "locality":
+                    {
+                        $arrayElemAt: [
+                            {
+                                $filter: {
+                                    input: "$pickupPoints.locality.details",
+                                    as: "item",
+                                    cond: { $eq: ["$$item.languageId", languageId] }
+                                }
+                            }, 0]
+                    }
+
+                },
+                variations: "$variations"
+            }
+
+        },
+        {
+            $group: {
+                _id: "$id",
+                id: { $first: "$id" },
+                discountPercentage: { $first: '$discountPercentage' },
+                images: { $first: '$images' },
+                thumbnail: { $first: '$thumbnail' },
+                discountEndDate: { $first: "$discountEndDate" },
+                startDate: { $first: "$startDate" },
+                endDate: { $first: "$endDate" },
+                tripDetails: { $first: "$tripDetails" },
+                pickupPoints: { $addToSet: "$pickupPoints" },
+                variations: { $first: '$variations' }
+            }
         }
-    },
-    {
-        $group: {
-            _id: "$id",
-            id: { $first: "$id" },
-            discountPercentage: { $first: '$discountPercentage' },
-            images: { $first: '$images' },
-            thumbnail: { $first: '$thumbnail'},
-            discountEndDate: { $first: "$discountEndDate" },
-            startDate: { $first: "$startDate" },
-            endDate: { $first: "$endDate" },
-            tripDetails: { $first: "$tripDetails" },
-            pickupPoints: { $addToSet: "$pickupPoints" },
-            variation: { $first: '$variations' }
-        }
-    }
-]
+
+    ]
+}
+
 
 export class TripsController {
     public static route: string = `/${TRIPS}`;
@@ -70,9 +135,9 @@ export class TripsController {
             .catch(err => res.status(403).send(err))
     }
     private get(req: Request, res: Response) {
-        this.db.collection(TRIPS).aggregate([
-            ...aggrigate
-        ]).toArray()
+        this.db.collection(TRIPS).aggregate(
+            getFilterForLang(req.query.lang)
+        ).toArray()
             .then(trips => {
                 res.send(trips);
             }).catch(err => res.status(500).send(err));
@@ -86,7 +151,7 @@ export class TripsController {
                     id: req.params.id
                 }
             },
-            ...aggrigate
+            ...getFilterForLang(req.query.lang)
         ]).next()
             .then((trip: Trip) => {
                 res.send(trip);
