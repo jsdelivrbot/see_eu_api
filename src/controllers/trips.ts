@@ -86,7 +86,7 @@ export class TripsController {
                     id: req.params.id
                 }
             },
-            //...aggrigate
+            ...aggrigate
         ]).next()
             .then((trip: Trip) => {
                 res.send(trip);

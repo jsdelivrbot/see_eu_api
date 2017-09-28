@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import { Db, ObjectID, InsertOneWriteOpResult } from 'mongodb';
 import { User } from '../models/user';
 import { EmailController } from './EmailController';
-import { CryptoHelper } from '../Helper/CryptoHelper';
+import { CryptoHelper } from '../helper/CryptoHelper';
 
 const USERS = "users";
 
