@@ -4,6 +4,6 @@ import { UserVariation } from "./user-variation";
 export class ItineraryDetail
 {
     name: string;
-    pickuppoint:PickupPoint;    
+    pickupPoint:PickupPoint;    
     variations:UserVariation[];
 }
