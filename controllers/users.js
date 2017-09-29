@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const EmailController_1 = require("./EmailController");
-const CryptoHelper_1 = require("../Helper/CryptoHelper");
+const CryptoHelper_1 = require("../helper/CryptoHelper");
 const USERS = "users";
 /* TODO */
 // Create a user and mark it as inactive

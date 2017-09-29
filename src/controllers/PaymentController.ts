@@ -102,12 +102,60 @@ export class PaymentController {
                 metadata: .tripId and .customerId,
                 failureReason: invalid_card_number, invalid_cvv, invalid_card_holder_name, card_expired, invalid_card_type, refused_by_issuer, insufficient_funds, inactive_card
             */
+            var paymentMethod = '';
+            switch (body.method) {
+                case 'banktransfer': {
+                    paymentMethod = 'Bank Transfer';
+                    break;
+                }
+                case 'belfius': {
+                    paymentMethod = 'Belfius Direct Net';
+                    break;
+                }
+                case 'bitcoin': {
+                    paymentMethod = 'Bitcoin';
+                    break;
+                }
+                case 'creditcard directdebit': {
+                    paymentMethod = 'Credit Card';
+                    break;
+                }
+                case 'giftcard': {
+                    paymentMethod = 'Gift Card';
+                    break;
+                }
+                case 'ideal': {
+                    paymentMethod = 'iDEAL';
+                    break;
+                }
+                case 'kbc': {
+                    paymentMethod = 'KBC/CBC Payment Button';
+                    break;
+                }
+                case 'paypal': {
+                    paymentMethod = 'PayPal';
+                    break;
+                }
+                case 'paysafecard': {
+                    paymentMethod = 'paysafecard';
+                    break;
+                }
+                case 'sofort': {
+                    paymentMethod = 'SOFORT Banking';
+                    break;
+                }
+                default: {
+                    paymentMethod = body.method;
+                }
+            }
             res.send({
                 code: 0,
                 data: {
-                    status: body.status,
-                    method: body.method,
-                    amount: body.amount
+                    status: body.status == 'paid',
+                    method: paymentMethod,
+                    amount: body.amount,
+                    transactionId: body.id,
+                    transactionDate: body.createdDatetime
                 }
             });
         });
