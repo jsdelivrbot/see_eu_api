@@ -27,6 +27,7 @@ class UsersController {
             password: user.password
         })
             .then((usr) => {
+            console.log(usr);
             res.status(200).send(usr);
         })
             .catch(err => res.status(403).send(err));
@@ -47,13 +48,20 @@ class UsersController {
     }
     createUser(req, res) {
         let user = req.body;
+        user.email = user.email.toLowerCase();
         let $this = this;
         user.id = (new Date()).valueOf().toString();
         this.db.collection(USERS).findOne({
-            email: new RegExp(user.email, "i")
+            // email: user.email
+            email: new RegExp(user.email, "i"),
         })
-            .then(() => {
-            res.status(409).send({ message: "User already exists with this email" });
+            .then((_user) => {
+            console.log(_user);
+            if (!_user) {
+            }
+            else {
+                res.status(409).send({ message: "User already exists with this email" });
+            }
         })
             .catch(() => {
             $this.db

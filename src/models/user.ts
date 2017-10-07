@@ -9,4 +9,6 @@ export class User{
     email:string;
     password:string;
     avatar?:Image;
+    isActivated: Boolean = false;
+    activationCode: String
 }
