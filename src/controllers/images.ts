@@ -3,7 +3,17 @@ import { Db, ObjectID, InsertWriteOpResult, InsertOneWriteOpResult } from 'mongo
 import { Image } from '../models/image';
 import * as multer from 'multer';
 const IMAGES = "images";
-const upload = multer({ dest: "uploads/" });
+
+var storage = multer.diskStorage({
+    destination:"./uploads",
+    filename:(req,file,cb)=>{
+        cb(null,(new Date()).valueOf().toString() + file.originalname); 
+    }
+    
+});
+const upload = multer({ storage: storage });
+
+//const upload = multer({ dest: "uploads/" });
 
 export class ImagesController {
     public static route: string = `/${IMAGES}`;
@@ -13,7 +23,7 @@ export class ImagesController {
     constructor(db: Db) {
         this.db = db;
         this.router.post('/', upload.single('image'), this.create.bind(this));
-        this.router.post('/multiple', upload.any(), this.createMultiple.bind(this))
+        this.router.post('/multiple', upload.array("images"), this.createMultiple.bind(this))
     }
 
     create(req: Request, res: Response, next: NextFunction) {
@@ -37,7 +47,7 @@ export class ImagesController {
     createMultiple(req: Request, res: Response, next: NextFunction) {
         let files = (req.files as Express.Multer.File[]);
         let images: Array<Image> = new Array<Image>(files.length);
-        for (let index = 0; index < files.length; index++){
+        for (let index = 0; index < files.length; index++) {
             let file = files[index];
             images[index] = {
                 id: (new Date()).valueOf().toString(),
@@ -55,9 +65,9 @@ export class ImagesController {
             .catch(err => {
                 res.status(400).send(err);
             })
-            
-            
-        
+
+
+
     }
 
 }
