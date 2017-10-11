@@ -6,7 +6,7 @@ import * as mongodb from 'mongodb';
 import { MongoClient, Db } from 'mongodb';
 import * as cors from "cors";
 
-import { UsersController } from './controllers/users';
+import { UserController } from './controllers/UserController';
 import { ImagesController } from './controllers/images'
 import { LanguagesController } from './controllers/languages';
 import { LocalitiesController } from './controllers/localities';
@@ -47,7 +47,7 @@ export class Index {
     }
 
     private configureRoutes(app: express.Router, db: Db) {
-        app.use(UsersController.route, new UsersController(db).router);
+        app.use(UserController.route, new UserController(db).router);
         app.use(ImagesController.route, new ImagesController(db).router);
         app.use(LanguagesController.route, new LanguagesController(db).router);
         app.use(LocalitiesController.route, new LocalitiesController(db).router);

@@ -24,7 +24,7 @@ class LocalitiesController {
             projectDetailsAsObject = [
                 {
                     $project: {
-                        id: "$_id",
+                        id: "$id",
                         details: { $arrayElemAt: ["$details", 0] }
                     }
                 }
@@ -41,6 +41,18 @@ class LocalitiesController {
                     localField: 'details.languageId',
                     foreignField: 'id',
                     as: 'details.language'
+                }
+            },
+            {
+                $project: {
+                    id: "$id",
+                    details: {
+                        name: "$details.name",
+                        languageId: "$details.languageId",
+                        language: {
+                            $arrayElemAt: ["$details.language", 0]
+                        }
+                    }
                 }
             },
             {

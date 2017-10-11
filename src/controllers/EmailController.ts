@@ -38,6 +38,7 @@ export class EmailController extends MessageController {
                 to: payload['to'],
                 subject: payload['subject'],
                 html: payload['html']
+                // html: this.emailHTML(payload)
             }
         };
 
