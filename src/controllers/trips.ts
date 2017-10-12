@@ -1,7 +1,10 @@
 import { Router, Request, Response } from 'express';
 import { Db, ObjectID, InsertOneWriteOpResult } from 'mongodb';
 import { Trip } from "../models/trip";
+import { VariationType } from '../models/variation';
 //import { User } from '../models/user';
+
+declare function emit(k, v);
 
 const TRIPS = "trips";
 const TRIP_DETAILS = "tripDetails";
@@ -49,7 +52,8 @@ const getFilterForLang = (languageId: string): any[] => {
                 variations: "$variations"
             }
         },
-        {//this project will filter pickuppoint details based on language
+        {
+            /*this project will filter pickuppoint details based on language*/
             $project: {
                 id: "$id",
                 discountPercentage: "$discountPercentage",
@@ -94,10 +98,13 @@ const getFilterForLang = (languageId: string): any[] => {
                 variations: { $first: '$variations' }
             }
         }
-
     ]
 }
 
+
+let filterDetailsByLang = [];
+let filterLabelInfoByLang = [];
+let groupFieldsIfFilteredByLang = [];
 
 export class TripsController {
     public static route: string = `/${TRIPS}`;
@@ -134,17 +141,25 @@ export class TripsController {
             })
             .catch(err => res.status(403).send(err))
     }
+
     private get(req: Request, res: Response) {
-        this.db.collection(TRIPS).aggregate(
-            getFilterForLang(req.query.lang)
-        ).toArray()
-            .then(trips => {
+        let $this = this;
+        this.db.collection(TRIPS).aggregate([
+            ...getFilterForLang(req.query.lang)
+        ]).toArray()
+            .then((trips: Trip[]) => {
+                trips.forEach(trip => {
+                    if (req.query.lang) {
+                        this.simplifyVariations(trip, req.query.lang);
+                    }
+                });
                 res.send(trips);
             }).catch(err => res.status(500).send(err));
+
     }
 
     private getById(req: Request, res: Response) {
-
+        let $this = this;
         this.db.collection(TRIPS).aggregate([
             {
                 $match: {
@@ -154,8 +169,51 @@ export class TripsController {
             ...getFilterForLang(req.query.lang)
         ]).next()
             .then((trip: Trip) => {
+
+                if (req.query.lang) {
+                    this.simplifyVariations(trip, req.query.lang);
+                }
+
                 res.send(trip);
             }).catch(err => res.status(500).send(err));
+
+    }
+
+    private simplifyVariations(trip: any, languageId: string) {
+
+        this.simplifyTripDetails(trip, languageId);
+        this.simplifyTripParams(trip, languageId);
+
+    }
+
+    private simplifyTripDetails(trip: any, languageId: string) {
+        if (trip && trip.variations) {
+            trip.variations.map(variation => {
+                if (variation.details) {
+                    variation.details = variation.details.filter(detail => detail.languageId == languageId)[0];
+                }
+                return variation;
+            })
+        }
+
+    }
+
+    private simplifyTripParams(trip: any, languageId) {
+        //this method only filters variations of type 0 i.e. value based variations
+        //which have labelInfo array in them
+        if (trip.variations) {
+            trip.variations.map(variation => {
+                if (variation.params && variation.params.constructor == Array) {
+                    variation.params.map(param => {
+                        if (param.labelInfo && param.labelInfo.constructor == Array) {
+                            param.labelInfo = param.labelInfo.filter(l => l.languageId == languageId)[0];
+                        }
+                    })
+                }
+                return variation;
+            })
+        }
+
     }
 
 

@@ -31,75 +31,13 @@ export class VariationsController {
     }
 
     get(req: Request, res: Response) {
-        let filterDetailsByLang = [];
-        let filterLabelInfoByLang = [];
-        let groupFieldsIfFilteredByLang = [];
-        if (req.query.lang) {
-            filterDetailsByLang = [
-                {
-                    $unwind: "$details"
-                }, 
-                {
-                    $match: {
-                        "details.languageId": req.query.lang
-                    }
-                }];
-
-            filterLabelInfoByLang = [
-                {
-                    $unwind: "$params"
-                },
-                {
-                    $unwind: {
-                        path: "$params.labelInfo",
-                        preserveNullAndEmptyArrays: true
-                    }
-                },
-                {
-                $match: {
-                    $or: [
-                        {
-                            $and: [
-                                {
-                                    "params.labelInfo": {
-                                        $exists: true
-                                    }
-                                },
-                                {
-                                    "params.labelInfo.languageId": {
-                                        $eq: req.query.lang
-                                    }
-                                }
-                            ]
-
-                        },
-                        {
-                            "params.labelInfo": {
-                                $exists: false
-                            }
-                        }
-                    ]
-                }
-            }]
-
-            groupFieldsIfFilteredByLang = [
-                {
-                    $group: {
-                        _id: "$id",
-                        id: { $first: "$id" },
-                        type: { $first: "$type" },
-                        details: { $first: "$details" },
-                        params: { $addToSet: "$params" }
-                    }
-                }
-            ]
-        }
+        
         this.db.collection(VARIATIONS).aggregate([
 
-            ...filterDetailsByLang,
+            //...filterDetailsByLang,
             
-            ...filterLabelInfoByLang,
-            ...groupFieldsIfFilteredByLang
+            //...filterLabelInfoByLang,
+            //...groupFieldsIfFilteredByLang
         ]).toArray()
             .then(variations => res.send(variations))
             .catch(err => res.status(500).send(err));
