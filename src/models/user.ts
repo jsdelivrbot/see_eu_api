@@ -10,5 +10,6 @@ export class User{
     password:string;
     avatar?:Image;
     isActivated: Boolean = false;
-    activationCode: String
+    activationCode: String;
+    passwordResetCode: String;
 }
