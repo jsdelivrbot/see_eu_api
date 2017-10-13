@@ -12,5 +12,5 @@ Dockerfile
 docker-compose.yml
 
 *.js
-# uploads
+ uploads
 !uploads/.gitkeep
