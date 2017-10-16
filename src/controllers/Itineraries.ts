@@ -1,12 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { Db, ObjectID, InsertOneWriteOpResult } from 'mongodb';
-//import { User } from '../models/user';
+import { Itineraries } from '../models/itineraries';
 
-const ITINERARY = "itinerary";
+const ITINERARIES = "itineraries";
 const ITINERARY_DETAILS = "itineraryDetails";
 
-export class ItineraryController {
-    public static route: string = `/${ITINERARY}`;
+export class ItinerariesController {
+    public static route: string = `/${ITINERARIES}`;
     public router: Router = Router();
     private db: Db;
     constructor(db: Db) {
@@ -17,17 +17,18 @@ export class ItineraryController {
     }
 
     private post(req: Request, res: Response) {
+        console.log(this.db);
         let itinerary = req.body;
         itinerary.id = (new Date()).valueOf().toString();
-        this.db.collection(ITINERARY).insertOne(itinerary)
+        this.db.collection(ITINERARIES).insertOne(itinerary)
             .then((itry) => {
-                res.status(200).send(itry)
+                res.status(200).send(itinerary)
             })
             .catch(err => res.status(403).send(err))
     }
 
     private getById(req: Request, res: Response) {
-        this.db.collection(ITINERARY).aggregate([
+        this.db.collection(ITINERARIES).aggregate([
             {
                 $match: {
                     id: req.params.id

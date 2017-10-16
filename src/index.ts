@@ -13,6 +13,7 @@ import { LocalitiesController } from './controllers/localities';
 import { TripsController } from './controllers/trips';
 import { VariationsController } from "./controllers/variations";
 import { PaymentController } from "./controllers/PaymentController";
+import { ItinerariesController } from "./controllers/Itineraries";
 
 export class Index {
     public app: Express;
@@ -54,6 +55,7 @@ export class Index {
         app.use(TripsController.route, new TripsController(db).router);
         app.use(VariationsController.route, new VariationsController(db).router);
         app.use(PaymentController.route, new PaymentController().router);        
+        app.use(ItinerariesController.route, new ItinerariesController(db).router);        
     }
 
 }

@@ -1,7 +1,7 @@
 import { ItineraryDetail } from "./itinerary-detail";
 
 
-export class Itinerary {
+export class Itineraries {
     id: string;
     userId: string;
     payment: any;
