@@ -20,6 +20,7 @@ export class ItinerariesController {
         console.log(this.db);
         let itinerary = req.body;
         itinerary.id = (new Date()).valueOf().toString();
+        itinerary.test = new Date();
         this.db.collection(ITINERARIES).insertOne(itinerary)
             .then((itry) => {
                 res.status(200).send(itinerary)

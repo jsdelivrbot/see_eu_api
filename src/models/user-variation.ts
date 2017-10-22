@@ -1,5 +1,9 @@
 export class UserVariation{
-    variation_id:string;
-    value: string;
+    id:string;
+    value: string | {
+        languageId: string;
+        label: string;
+    }[];
+
     amount: number;
 }
