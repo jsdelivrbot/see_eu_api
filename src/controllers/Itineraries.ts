@@ -34,46 +34,6 @@ export class ItinerariesController {
                 $match: {
                     id: req.params.id
                 }
-            },
-            {
-                $lookup: {
-                    from: ITINERARY_DETAILS,
-                    localField: "id",
-                    foreignField: "itineraryId",
-                    as: ITINERARY_DETAILS
-                }
-            },
-            {
-                $unwind: "$pickupPoints"
-            },
-            {
-                $lookup: {
-                    from: "localities",
-                    localField: "pickupPoints.localityId",
-                    foreignField: "id",
-                    as: "pickupPoints.locality"
-                }
-            },
-            {
-                $unwind: "$variationDetails"
-            },
-            {
-                $lookup: {
-                    from: "variationDetails",
-                    localField: "variations.variationDetailId",
-                    foreignField: "id",
-                    as: "variations"
-                }
-            },
-            {
-                $group: {
-                    _id: "$id",
-                    tripId: { $first: "$tripId" },
-                    userId: { $first: "$userId" },                    
-                    itineraryDetails: { $first: "$itineraryDetails" },
-                    pickupPoints: { $addToSet: "$pickupPoints" },
-                    variationDetails: {$addToSet: "$variationDetails"}
-                }
             }
         ]).next()
             .then(itinerary => {

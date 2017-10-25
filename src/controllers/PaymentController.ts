@@ -37,8 +37,7 @@ export class PaymentController {
                 description: req.body.description,
                 redirectUrl: 'http://localhost:4500/#!/payment-status',
                 metadata: {
-                    tripId: req.body.tripId,
-                    customerId: req.body.customerId
+                    itineraryId: req.body.itineraryId                    
                 }
             }
         };
