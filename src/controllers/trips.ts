@@ -101,6 +101,18 @@ const getFilterForLang = (languageId: string): any[] => {
     ]
 }
 
+const getActiveTrips = (getAllTrips: boolean) => {
+    if (getAllTrips) { return [] }
+    return [
+        {
+            $match: {
+                startDate:{
+                    $gt: new Date()
+                }
+            }
+        }
+    ]
+}
 
 let filterDetailsByLang = [];
 let filterLabelInfoByLang = [];
@@ -121,8 +133,11 @@ export class TripsController {
     }
 
     private post(req: Request, res: Response) {
-        let trip = req.body;
-        trip.id = (new Date()).valueOf().toString();
+        req.body.id = (new Date()).valueOf().toString();
+        let trip = req.body as Trip;
+
+        this.populateDates(trip);
+
         this.db.collection(TRIPS).insertOne(trip)
             .then((trp) => {
                 res.status(200).send(trip)
@@ -130,9 +145,18 @@ export class TripsController {
             .catch(err => res.status(403).send(err))
     }
 
+    private populateDates(trip: Trip) {
+        trip.discountEndDate = new Date(trip.discountEndDate);
+        trip.endDate = new Date(trip.endDate);
+        trip.startDate = new Date(trip.startDate);
+    }
+
     private put(req: Request, res: Response) {
         delete req.body._id;
         let trip = req.body;
+
+        this.populateDates(trip);
+
         this.db.collection(TRIPS).updateOne({
             id: trip.id
         }, { $set: trip })
@@ -144,8 +168,12 @@ export class TripsController {
 
     private get(req: Request, res: Response) {
         let $this = this;
+        var getAllTrips = req.query.all ? true : false;
+        
         this.db.collection(TRIPS).aggregate([
-            ...getFilterForLang(req.query.lang)
+            ...getActiveTrips(getAllTrips),
+            ...getFilterForLang(req.query.lang),
+
         ]).toArray()
             .then((trips: Trip[]) => {
                 trips.forEach(trip => {
