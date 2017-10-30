@@ -35,8 +35,17 @@ export class UserController {
             if (_user.isActivated === false) {
                 res.send({code: -1, message: 'Account is not activated. Please activate your account clicking on the activation URL send to your email'});
             }
-            else {
-                res.send({code: 0, data: _user});
+            else {            
+                res.send({code: 0, data: {
+                    id: _user.id,
+                    firstName: _user.firstName,
+                    lastName: _user.lastName,
+                    dob: _user.dob,
+                    mobile: _user.mobile,
+                    gender: _user.gender,
+                    email: _user.email,
+                    avatar: _user.avatar
+                }});
             }
         })
         .catch(err => res.send({code: -1, message: 'Invalid username or password'}));
