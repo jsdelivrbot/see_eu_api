@@ -47,7 +47,6 @@ const getFilterForLang = (languageId: string): any[] => {
                         $arrayElemAt: ["$pickupPoints.locality", 0]
 
                     }
-
                 },
                 variations: "$variations"
             }
@@ -81,7 +80,6 @@ const getFilterForLang = (languageId: string): any[] => {
                 },
                 variations: "$variations"
             }
-
         },
         {
             $group: {
@@ -110,7 +108,25 @@ const getActiveTrips = (getAllTrips: boolean) => {
                     $gt: new Date()
                 }
             }
-        }
+        },
+        {
+            $project: {
+                id: "$id",
+                discountPercentage:
+                {
+                  $cond: { if: { $lte: [ "$discountEndDate", new Date() ] }, then: "$discountPercentage", else: 0 }
+                },                                
+                images: "$images",
+                thumbnail: "$thumbnail",
+                discountEndDate: "$discountEndDate",
+                startDate: "$startDate",
+                endDate: "$endDate",
+                tripDetails: "$tripDetails",
+                pickupPoints: "$pickupPoints",
+                variations: "$variations"
+            }           
+
+        },        
     ]
 }
 
@@ -173,7 +189,6 @@ export class TripsController {
         this.db.collection(TRIPS).aggregate([
             ...getActiveTrips(getAllTrips),
             ...getFilterForLang(req.query.lang),
-
         ]).toArray()
             .then((trips: Trip[]) => {
                 trips.forEach(trip => {
@@ -183,17 +198,19 @@ export class TripsController {
                 });
                 res.send(trips);
             }).catch(err => res.status(500).send(err));
-
     }
 
     private getById(req: Request, res: Response) {
         let $this = this;
+        var getAllTrips = req.query.all ? true : false;
+
         this.db.collection(TRIPS).aggregate([
             {
                 $match: {
                     id: req.params.id
                 }
             },
+            ...getActiveTrips(getAllTrips),
             ...getFilterForLang(req.query.lang)
         ]).next()
             .then((trip: Trip) => {
