@@ -3,17 +3,22 @@
  * TODO: Create a Webhook URL and dispatch email when the Payment Gateway posts to the Webhook URL
  */
 import { Router, Request, Response } from 'express';
+import { Db, ObjectID, InsertOneWriteOpResult } from 'mongodb';
 import { EmailController } from './EmailController';
+import { Itineraries } from '../models/itineraries';
 
 const PAYMENT = "payment";
 const PAYMENT_STATUS = "paymentStatus";
+const ITINERARIES = "itineraries";
 
 export class PaymentController {
 
     public static route: string = `/${PAYMENT}`;
     public router: Router = Router();
+    private db: Db;
 
-    constructor() {
+    constructor(db: Db) {
+        this.db = db;
         this.router.post('/', this.requestPayment.bind(this));
         this.router.get('/paymentStatus/:id', this.paymentStatus.bind(this));
     }
@@ -66,6 +71,7 @@ export class PaymentController {
      *  fetches the payment status
      */
     private paymentStatus(req: Request, res: Response) {
+        var db = this.db;
         var request = require('request');
         var headers = {
             'Authorization':       'Bearer test_A2aknc4MCC6P3m5feqHcFrzeF3nUgs'
@@ -80,6 +86,8 @@ export class PaymentController {
         request(options, function (error, response, body) {
             body = JSON.parse(body);
 
+            //console.log(body);
+
             var emailController = EmailController.instance();
             emailController.send({
                 from: 'admin@see-globe.com',
@@ -89,6 +97,7 @@ export class PaymentController {
                 isPriority: true
             });
             
+
             //TODO: Save data to DB. Get details from body
             /*
                 id: payment id,
@@ -147,16 +156,31 @@ export class PaymentController {
                     paymentMethod = body.method;
                 }
             }
-            res.send({
-                code: 0,
-                data: {
-                    status: body.status == 'paid',
-                    method: paymentMethod,
-                    amount: body.amount,
-                    transactionId: body.id,
-                    transactionDate: body.createdDatetime
-                }
-            });
+            db.collection(ITINERARIES).updateOne({
+                id: body.metadata.itineraryId
+            }, { $set: {payment: {
+                status: body.status == 'paid',
+                method: paymentMethod,
+                amount: body.amount,
+                transactionId: body.id,
+                transactionDate: body.createdDatetime
+                } 
+            }
+            })
+               .then((itnry) => {
+                    res.send({
+                        code: 0,
+                        data: {
+                            status: body.status == 'paid',
+                            method: paymentMethod,
+                            amount: body.amount,
+                            transactionId: body.id,
+                            transactionDate: body.createdDatetime,
+                            itinerary: itnry
+                        }
+                    });                    
+                })
+                .catch(err => res.status(403).send(err))
         });
     }
 }
