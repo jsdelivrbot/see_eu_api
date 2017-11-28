@@ -11,6 +11,6 @@ npm-debug.log
 Dockerfile
 docker-compose.yml
 
-*.js
+
  uploads
 !uploads/.gitkeep
