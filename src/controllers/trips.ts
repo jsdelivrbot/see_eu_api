@@ -114,7 +114,7 @@ const getActiveTrips = (getAllTrips: boolean) => {
                 id: "$id",
                 discountPercentage:
                 {
-                  $cond: { if: { $lte: [ "$discountEndDate", new Date() ] }, then: "$discountPercentage", else: 0 }
+                  $cond: { if: { $gte: [ "$discountEndDate", new Date() ] }, then: "$discountPercentage", else: 0 }
                 },                                
                 images: "$images",
                 thumbnail: "$thumbnail",

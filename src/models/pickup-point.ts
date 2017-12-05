@@ -1,5 +1,7 @@
+
+import { Locality } from "./locality";
 export class PickupPoint {
-    localityId: string;
+    localityId: Locality;
     price: number;
     //discountedPrice: number;
 }
