@@ -78,6 +78,7 @@ export class ItinerariesController {
                     .then(__itinerary => {
                         console.log('__itinerary: ' + __itinerary);
                         itinerary.trip = {
+                            id: __itinerary['_id'],
                             name: __itinerary['tripDetails'][0]['name'],
                             description: __itinerary['tripDetails'][0]['description']
                         }

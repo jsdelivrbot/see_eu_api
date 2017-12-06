@@ -257,6 +257,31 @@ export class UserController {
                 res.send({code: -1, message: err.toString()});
             })
         }
+        else {
+            if ('email' in payload == false) {
+                res.json({code: -1, message: 'You need to login first'});
+            }
+            else if ('password' in payload == false) {
+                res.json({code: -1, message: 'Enter password'});
+            }
+            else {
+                this.db.collection(USERS).update(
+                    {email: payload.email},
+                    {$set: {password: payload.password}}
+                )
+                .then((_resp) => {
+                    if (_resp.result.n != 0) {
+                        res.json({code: 0, message: 'Password reset successfully'});
+                    }
+                    else {
+                        res.json({code: -1, message: 'Unable to reset password'});
+                    }
+                })
+                .catch(err => {
+                    res.json({code: -1, message: err.toString()});
+                })
+            }
+        }
     }
 
     private updateUser(req: Request, res: Response) {
