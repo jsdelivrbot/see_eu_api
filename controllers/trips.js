@@ -1,15 +1,12 @@
-import { Router, Request, Response } from 'express';
-import { Db, ObjectID, InsertOneWriteOpResult } from 'mongodb';
-import { Trip } from "../models/trip";
-import { VariationType } from '../models/variation';
-//import { User } from '../models/user';
-
-declare function emit(k, v);
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
 const TRIPS = "trips";
 const TRIP_DETAILS = "tripDetails";
-const getFilterForLang = (languageId: string): any[] => {
-    if (!languageId) { return []; }
+const getFilterForLang = (languageId) => {
+    if (!languageId) {
+        return [];
+    }
     return [
         {
             $unwind: "$tripDetails"
@@ -45,7 +42,6 @@ const getFilterForLang = (languageId: string): any[] => {
                     "price": "$pickupPoints.price",
                     "locality": {
                         $arrayElemAt: ["$pickupPoints.locality", 0]
-
                     }
                 },
                 variations: "$variations"
@@ -65,8 +61,7 @@ const getFilterForLang = (languageId: string): any[] => {
                 pickupPoints: {
                     "localityId": "$pickupPoints.localityId",
                     "price": "$pickupPoints.price",
-                    "locality":
-                    {
+                    "locality": {
                         $arrayElemAt: [
                             {
                                 $filter: {
@@ -74,9 +69,9 @@ const getFilterForLang = (languageId: string): any[] => {
                                     as: "item",
                                     cond: { $eq: ["$$item.languageId", languageId] }
                                 }
-                            }, 0]
+                            }, 0
+                        ]
                     }
-
                 },
                 variations: "$variations"
             }
@@ -96,15 +91,16 @@ const getFilterForLang = (languageId: string): any[] => {
                 variations: { $first: '$variations' }
             }
         }
-    ]
-}
-
-const getActiveTrips = (getAllTrips: boolean) => {
-    if (getAllTrips) { return [] }
+    ];
+};
+const getActiveTrips = (getAllTrips) => {
+    if (getAllTrips) {
+        return [];
+    }
     return [
         {
             $match: {
-                startDate:{
+                startDate: {
                     $gt: new Date()
                 }
             }
@@ -112,10 +108,9 @@ const getActiveTrips = (getAllTrips: boolean) => {
         {
             $project: {
                 id: "$id",
-                discountPercentage:
-                {
-                  $cond: { if: { $gte: [ "$discountEndDate", new Date() ] }, then: "$discountPercentage", else: 0 }
-                },                                
+                discountPercentage: {
+                    $cond: { if: { $lte: ["$discountEndDate", new Date()] }, then: "$discountPercentage", else: 0 }
+                },
                 images: "$images",
                 thumbnail: "$thumbnail",
                 discountEndDate: "$discountEndDate",
@@ -124,86 +119,69 @@ const getActiveTrips = (getAllTrips: boolean) => {
                 tripDetails: "$tripDetails",
                 pickupPoints: "$pickupPoints",
                 variations: "$variations"
-            }           
-
-        },        
-    ]
-}
-
+            }
+        },
+    ];
+};
 let filterDetailsByLang = [];
 let filterLabelInfoByLang = [];
 let groupFieldsIfFilteredByLang = [];
-
-export class TripsController {
-    public static route: string = `/${TRIPS}`;
-    public router: Router = Router();
-    private db: Db;
-    constructor(db: Db) {
+class TripsController {
+    constructor(db) {
+        this.router = express_1.Router();
         this.db = db;
         this.router.get('/', this.get.bind(this));
         this.router.post('/', this.post.bind(this));
         this.router.get('/:id', this.getById.bind(this));
         this.router.put('/:id', this.put.bind(this));
         // this.router.delete('/:id', this.deleteUser.bind(this))
-
     }
-
-    private post(req: Request, res: Response) {
+    post(req, res) {
         req.body.id = (new Date()).valueOf().toString();
-        let trip = req.body as Trip;
-
+        let trip = req.body;
         this.populateDates(trip);
-
         this.db.collection(TRIPS).insertOne(trip)
             .then((trp) => {
-                res.status(200).send(trip)
-            })
-            .catch(err => res.status(403).send(err))
+            res.status(200).send(trip);
+        })
+            .catch(err => res.status(403).send(err));
     }
-
-    private populateDates(trip: Trip) {
+    populateDates(trip) {
         trip.discountEndDate = new Date(trip.discountEndDate);
         trip.endDate = new Date(trip.endDate);
         trip.startDate = new Date(trip.startDate);
     }
-
-    private put(req: Request, res: Response) {
+    put(req, res) {
         delete req.body._id;
         let trip = req.body;
-
         this.populateDates(trip);
-
         this.db.collection(TRIPS).updateOne({
             id: trip.id
         }, { $set: trip })
             .then((trp) => {
-                res.status(200).send(trip)
-            })
-            .catch(err => res.status(403).send(err))
+            res.status(200).send(trip);
+        })
+            .catch(err => res.status(403).send(err));
     }
-
-    private get(req: Request, res: Response) {
+    get(req, res) {
         let $this = this;
         var getAllTrips = req.query.all ? true : false;
-        
         this.db.collection(TRIPS).aggregate([
             ...getActiveTrips(getAllTrips),
             ...getFilterForLang(req.query.lang),
         ]).toArray()
-            .then((trips: Trip[]) => {
-                trips.forEach(trip => {
-                    if (req.query.lang) {
-                        this.simplifyVariations(trip, req.query.lang);
-                    }
-                });
-                res.send(trips);
-            }).catch(err => res.status(500).send(err));
+            .then((trips) => {
+            trips.forEach(trip => {
+                if (req.query.lang) {
+                    this.simplifyVariations(trip, req.query.lang);
+                }
+            });
+            res.send(trips);
+        }).catch(err => res.status(500).send(err));
     }
-
-    private getById(req: Request, res: Response) {
+    getById(req, res) {
         let $this = this;
         var getAllTrips = req.query.all ? true : false;
-
         this.db.collection(TRIPS).aggregate([
             {
                 $match: {
@@ -213,37 +191,28 @@ export class TripsController {
             ...getActiveTrips(getAllTrips),
             ...getFilterForLang(req.query.lang)
         ]).next()
-            .then((trip: Trip) => {
-
-                if (req.query.lang) {
-                    this.simplifyVariations(trip, req.query.lang);
-                }
-
-                res.send(trip);
-            }).catch(err => res.status(500).send(err));
-
+            .then((trip) => {
+            if (req.query.lang) {
+                this.simplifyVariations(trip, req.query.lang);
+            }
+            res.send(trip);
+        }).catch(err => res.status(500).send(err));
     }
-
-    private simplifyVariations(trip: any, languageId: string) {
-
+    simplifyVariations(trip, languageId) {
         this.simplifyTripDetails(trip, languageId);
         this.simplifyTripParams(trip, languageId);
-
     }
-
-    private simplifyTripDetails(trip: any, languageId: string) {
+    simplifyTripDetails(trip, languageId) {
         if (trip && trip.variations) {
             trip.variations.map(variation => {
                 if (variation.details) {
                     variation.details = variation.details.filter(detail => detail.languageId == languageId)[0];
                 }
                 return variation;
-            })
+            });
         }
-
     }
-
-    private simplifyTripParams(trip: any, languageId) {
+    simplifyTripParams(trip, languageId) {
         //this method only filters variations of type 0 i.e. value based variations
         //which have labelInfo array in them
         if (trip.variations) {
@@ -253,13 +222,12 @@ export class TripsController {
                         if (param.labelInfo && param.labelInfo.constructor == Array) {
                             param.labelInfo = param.labelInfo.filter(l => l.languageId == languageId)[0];
                         }
-                    })
+                    });
                 }
                 return variation;
-            })
+            });
         }
-
     }
-
-
 }
+TripsController.route = `/${TRIPS}`;
+exports.TripsController = TripsController;
