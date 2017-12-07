@@ -32,7 +32,7 @@ class PaymentController {
             form: {
                 amount: req.body.amount,
                 description: req.body.description,
-                redirectUrl: 'http://localhost:4500/#!/payment-status',
+                redirectUrl: 'https://serene-falls-64392.herokuapp.com/#!/payment-status',
                 metadata: {
                     itineraryId: req.body.itineraryId
                 }
