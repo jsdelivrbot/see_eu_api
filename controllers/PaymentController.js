@@ -32,7 +32,7 @@ class PaymentController {
             form: {
                 amount: req.body.amount,
                 description: req.body.description,
-                redirectUrl: 'https://serene-falls-64392.herokuapp.com/#!/payment-status',
+                redirectUrl: 'https://see-india.co/#!/payment-status',
                 metadata: {
                     itineraryId: req.body.itineraryId
                 }
