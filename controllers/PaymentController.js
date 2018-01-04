@@ -32,7 +32,7 @@ class PaymentController {
             form: {
                 amount: req.body.amount,
                 description: req.body.description,
-                redirectUrl: 'https://see-india.co/#!/payment-status',
+                redirectUrl: 'http://see-india.co/#!/payment-status',
                 metadata: {
                     itineraryId: req.body.itineraryId
                 }
